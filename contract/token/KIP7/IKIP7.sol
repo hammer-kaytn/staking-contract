@@ -1,6 +1,6 @@
 pragma solidity ^0.5.0;
 
-import "./IKIP13.sol";
+import "../../introspection/IKIP13.sol";
 
 /**
  * @dev Interface of the KIP7 standard as defined in the KIP. Does not include

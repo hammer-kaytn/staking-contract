@@ -1,6 +1,6 @@
 pragma solidity ^0.5.0;
 
-import "./PauserRole.sol";
+import "../access/roles/PauserRole.sol";
 
 /**
  * @dev Contract module which allows children to implement an emergency stop

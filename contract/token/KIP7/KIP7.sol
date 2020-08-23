@@ -1,9 +1,9 @@
 pragma solidity ^0.5.0;
 
 import "./IKIP7.sol";
-import "./SafeMath.sol";
-import "./KIP13.sol";
-import "./Address.sol";
+import "../../math/SafeMath.sol";
+import "../../introspection/KIP13.sol";
+import "../../utils/Address.sol";
 import "./IKIP7Receiver.sol";
 
 /**
