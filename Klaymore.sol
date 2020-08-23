@@ -1,22 +1,24 @@
 pragma solidity ^0.5.0;
 
 import "caver-js/packages/caver-kct/src/contract/token/KIP7/KIP7.sol";
+import "caver-js/packages/caver-kct/src/contract/token/KIP7/KIP7Metadata.sol"
+import "caver-js/packages/caver-kct/src/contract/token/KIP7/KIP7Pausable.sol"
 
-contract Klaymore is KIP7 {
+contract Klaymore is KIP7,KIP7Metadata,KIP7Pausable {
     address private _owner;
-    string private _name;
-    string private _symbol;
-    uint8 private _decimals;
-    uint256 private _totalSupply;
+    
     address [] internal stakeholders; 
     
     mapping(address => uint256) internal stakes;
     mapping(address => uint256) internal rewards;
     
-    constructor(string memory name,string memory symbol,uint8 decimals) public {
-        _name = name;
-        _symbol = symbol;
-        _decimals = decimals;
+    modifier onlyOwner(){
+    require(msg.sender == _owner);
+    _;
+    }
+    
+    constructor(string memory name, string memory symbol, uint8 decimals) KIP7Metadata(name, symbol, decimals) public { 
+    
     }
     // 테스트용 클레이예치 및 토큰 반환하는기능.  비율은 예치한 클레이와 동일하게함.
     function createStake(uint256 _stake) public {
@@ -102,13 +104,13 @@ contract Klaymore is KIP7 {
     /**
      * @notice A method to distribute rewards to all stakeholders.
      */
-    // function distributeRewards() public onlyOwner {
-    //     for (uint256 s = 0; s < stakeholders.length; s += 1){
-    //         address stakeholder = stakeholders[s];
-    //         uint256 reward = calculateReward(stakeholder);
-    //         rewards[stakeholder] = rewards[stakeholder].add(reward);
-    //     }
-    // }
+    function distributeRewards() public onlyOwner {
+        for (uint256 s = 0; s < stakeholders.length; s += 1){
+            address stakeholder = stakeholders[s];
+            uint256 reward = calculateReward(stakeholder);
+            rewards[stakeholder] = rewards[stakeholder].add(reward);
+        }
+    }
 
     /**
      * @notice A method to allow a stakeholder to withdraw his rewards.
