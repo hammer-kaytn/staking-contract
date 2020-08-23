@@ -1,8 +1,8 @@
 pragma solidity ^0.5.0;
 
-import "./KIP7.sol";
-import "./KIP7Metadata.sol";
-import "./KIP7Pausable.sol";
+import "caver-js/packages/caver-kct/src/contract/token/KIP7/KIP7.sol";
+import "caver-js/packages/caver-kct/src/contract/token/KIP7/KIP7Metadata.sol";
+import "caver-js/packages/caver-kct/src/contract/token/KIP7/KIP7Pausable.sol";
 
 contract Klaymore is KIP7,KIP7Metadata,KIP7Pausable {
     address private _owner;
@@ -14,7 +14,7 @@ contract Klaymore is KIP7,KIP7Metadata,KIP7Pausable {
     
     modifier onlyOwner(){
     require(msg.sender == _owner);
-     _;
+    _;
     }
     
     constructor(string memory name, string memory symbol, uint8 decimals,uint256 amount) KIP7Metadata(name, symbol, decimals) public { 
