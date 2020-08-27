@@ -5,95 +5,43 @@ import "caver-js/packages/caver-kct/src/contract/token/KIP7/KIP7Metadata.sol";
 import "caver-js/packages/caver-kct/src/contract/token/KIP7/KIP7Pausable.sol";
 
 contract Klaymore is KIP7,KIP7Metadata,KIP7Pausable {
-    address private _owner;
+    contract TokenContract is KIP7,KIP7Metadata,KIP7Pausable {
+    address public owner;
+
+    uint256 private _totalSupply;
     
-    address [] internal stakeholders; 
-    
-    mapping(address => uint256) internal stakes;
-    mapping(address => uint256) internal rewards;
+    mapping (address => uint256) private _balances;
+    event CoinDeposit(address indexed _from, uint256 _value); 
+    event SwapRequest(address indexed _from, uint256 _value);    
+
     
     modifier onlyOwner(){
-    require(msg.sender == _owner);
+    require(msg.sender == owner);
     _;
     }
     
-    constructor(string memory name, string memory symbol, uint8 decimals,uint256 amount) KIP7Metadata(name, symbol, decimals) public { 
-    _mint(msg.sender,amount);
+    constructor(string memory name, string memory symbol, uint8 decimals) KIP7Metadata(name, symbol, decimals) public { 
+    owner = msg.sender;
     }
     
-    function createStake(uint256 _stake) public {
-        _burn(msg.sender, _stake);
-        if(stakes[msg.sender] == 0) addStakeholder(msg.sender);
-        stakes[msg.sender] = stakes[msg.sender].add(_stake);
+    //스테이킹 기능, 스테이킹시 같은 갯수의 토큰을 반환
+    function Staking() public payable {
+        _balances[msg.sender] += _balances[msg.sender].add(msg.value);
+        _totalSupply = _totalSupply.add(msg.value); 
+        _mint(msg.sender,msg.value);
+        emit CoinDeposit(msg.sender, msg.value);
     }
-    
-    function removeStake(uint256 _stake) public {
-        stakes[msg.sender] = stakes[msg.sender].sub(_stake);
-        if(stakes[msg.sender] == 0) removeStakeholder(msg.sender);
-        _mint(msg.sender, _stake);
+    //언스테이킹 기능,
+    function Unstaking(uint256 amount) public returns (bool) {
+        require(amount <= _balances[msg.sender]);
+        _balances[msg.sender] = _balances[msg.sender].sub(amount);
+        _burn(msg.sender,amount);
+        msg.sender.transfer(amount);
+        emit SwapRequest(msg.sender,amount);
+        return true;
     }
-    
-    function stakeOf(address _stakeholder) public view returns(uint256) {
-        return stakes[_stakeholder];
-    }
-    
-    function totalStakes() public view returns(uint256) {
-    uint256 _totalStakes = 0;
-    for (uint256 s = 0; s < stakeholders.length; s += 1){
-        _totalStakes = _totalStakes.add(stakes[stakeholders[s]]);
-    }
-    return _totalStakes;
-    }
-
-    function isStakeholder(address _address)public view returns(bool, uint256) {
-    for (uint256 s = 0; s < stakeholders.length; s += 1){
-        if (_address == stakeholders[s]) return (true, s);
-    }
-    return (false, 0);
-    }
-    
-    function addStakeholder(address _stakeholder) public {
-        (bool _isStakeholder, ) = isStakeholder(_stakeholder);
-        if(!_isStakeholder) stakeholders.push(_stakeholder);
-    }
-    
-    function removeStakeholder(address _stakeholder) public {
-        (bool _isStakeholder, uint256 s) = isStakeholder(_stakeholder);
-        if(_isStakeholder){
-            stakeholders[s] = stakeholders[stakeholders.length - 1];
-            stakeholders.pop();
-        } 
-    }
-    // ---------- REWARDS ----------
-    
-    function rewardOf(address _stakeholder) public view returns(uint256)
-    {
-        return rewards[_stakeholder];
-    }
-
-    function totalRewards() public view returns(uint256) {
-        uint256 _totalRewards = 0;
-        for (uint256 s = 0; s < stakeholders.length; s += 1){
-            _totalRewards = _totalRewards.add(rewards[stakeholders[s]]);
-        }
-        return _totalRewards;
-    }
-
-    function calculateReward(address _stakeholder) public view returns(uint256) {
-        return stakes[_stakeholder] / 100;
-    }
-
-    function distributeRewards() public onlyOwner {
-        for (uint256 s = 0; s < stakeholders.length; s += 1){
-            address stakeholder = stakeholders[s];
-            uint256 reward = calculateReward(stakeholder);
-            rewards[stakeholder] = rewards[stakeholder].add(reward);
-        }
-    }
-
-    function withdrawReward() public {
-        uint256 reward = rewards[msg.sender];
-        rewards[msg.sender] = 0;
-        _mint(msg.sender, reward);
+    //스테이커에게 전송하는 기능. 이 기능은 오로지 컨트렉트의 주인만이 할수있다.
+    function TransferToStaker(address payable _to, uint256 amount) onlyOwner public {
+        _to.transfer(amount);
     }
 }
