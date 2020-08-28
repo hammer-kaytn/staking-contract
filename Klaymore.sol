@@ -5,7 +5,6 @@ import "caver-js/packages/caver-kct/src/contract/token/KIP7/KIP7Metadata.sol";
 import "caver-js/packages/caver-kct/src/contract/token/KIP7/KIP7Pausable.sol";
 
 contract Klaymore is KIP7,KIP7Metadata,KIP7Pausable {
-    contract TokenContract is KIP7,KIP7Metadata,KIP7Pausable {
     address public owner;
 
     uint256 private _totalSupply;
