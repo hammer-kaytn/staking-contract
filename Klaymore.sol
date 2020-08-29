@@ -3,8 +3,9 @@ pragma solidity ^0.5.0;
 import "caver-js/packages/caver-kct/src/contract/token/KIP7/KIP7.sol";
 import "caver-js/packages/caver-kct/src/contract/token/KIP7/KIP7Metadata.sol";
 import "caver-js/packages/caver-kct/src/contract/token/KIP7/KIP7Pausable.sol";
+import "./MultiSigWallet.sol";
 
-contract Klaymore is KIP7,KIP7Metadata,KIP7Pausable {
+contract Klaymore is KIP7,KIP7Metadata,KIP7Pausable,MultiSigWallet {
     address public owner;
 
     uint256 private _totalSupply;

@@ -148,3 +148,8 @@ string gender;
 
  - mapping(_KeyType=>_ValueType) 이런식으로 사용
 
+-----
+
+# 다중 서명 계약(multisig)
+
+만드는중~~ 
