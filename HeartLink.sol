@@ -11,9 +11,10 @@ contract HeartLink is KIP7,KIP7Metadata,KIP7Pausable{
     uint256 public required;
     
     mapping (address => uint256) private _balances;
+    mapping (address => bool) public isOwner;
     mapping (uint => Transaction) public transactions;
     mapping (uint => mapping (address => bool)) public confirmations;
-    mapping (address => bool) public isOwner;
+    
     
     event CoinDeposit(address indexed _from, uint256 _value); 
     event SwapRequest(address indexed _from, uint256 _value);    
@@ -21,6 +22,7 @@ contract HeartLink is KIP7,KIP7Metadata,KIP7Pausable{
     event Execution(uint indexed transactionId);
     event ExecutionFailure(uint indexed transactionId);
     event Submission(uint indexed transactionId);
+    event Deposit(address indexed sender, uint value);
     
     struct Transaction {
         address destination;
@@ -34,7 +36,7 @@ contract HeartLink is KIP7,KIP7Metadata,KIP7Pausable{
         _;
     }
     
-    modifier transactionExists(uint transactionId) {
+     modifier transactionExists(uint transactionId) {
         require(transactions[transactionId].destination != address(0));
         _;
     }
@@ -59,7 +61,14 @@ contract HeartLink is KIP7,KIP7Metadata,KIP7Pausable{
         _;
     }
     
-    constructor(address [] memory _owners, uint _required, string memory name, string memory symbol, uint8 decimals) KIP7Metadata(name, symbol, decimals) public { 
+    function()
+        external payable
+    {
+        if (msg.value > 0)
+            emit Deposit(msg.sender, msg.value);
+    }
+    
+    constructor(address[] memory _owners, uint _required, string memory name, string memory symbol, uint8 decimals) KIP7Metadata(name, symbol, decimals) public { 
         for (uint i=0; i<_owners.length; i++) {
                 require(!isOwner[_owners[i]] && _owners[i] != address(0));
                 isOwner[_owners[i]] = true;
@@ -105,6 +114,7 @@ contract HeartLink is KIP7,KIP7Metadata,KIP7Pausable{
         public
         returns (uint transactionId)
     {
+        require(isOwner[msg.sender]);
         transactionId = addTransaction(destination, value, data);
         confirmTransaction(transactionId);
     }
