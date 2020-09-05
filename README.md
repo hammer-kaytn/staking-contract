@@ -152,4 +152,4 @@ string gender;
 
 # 다중 서명 계약(multisig)
 
-만드는중~~ 
+만드는중~~
