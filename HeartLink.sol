@@ -96,9 +96,9 @@ contract HeartLink is KIP7,KIP7Metadata,KIP7Pausable{
         return true;
     }
     
-    // @ dev스테이커에게 클레이 전송하는 기능. 이 기능은 오로지 컨트렉트의 주인만이 할수있다.
-    // @ params _to 받는사람주소
-    // @ params amount 보내는 수량
+    // @dev 스테이커에게 클레이 전송하는 기능. 이 기능은 오로지 컨트렉트의 주인만이 할수있다.
+    // @params _to 받는사람주소
+    // @params amount 보내는 수량
     // function TransferToStaker(address payable _to, uint256 amount) onlyOwner public {
     //     _to.transfer(amount);
     // }
