@@ -11,16 +11,19 @@ contract Advertise {
         uint totalReword; //미션에 걸려있는 총 보상
     }
   
-    mapping (uint => Mission) public missions; //광고등록이 덮어씌어지지 않도록 맵핑
+    mapping (uint => Mission) public missions; //광고등록이 덮어씌어지지 않도록 uint id로 맵핑
     uint missionsId = 0;
     
+    //광고를 만들었을때 미션식별과 광고주 주소, 목표 좋아요, 유효기간, 총보상량을 이벤트 호출
     event GeneratedMission(
         uint indexed _id,
         address indexed _advertiser,
         uint _likingGoal,
         uint _deadline,
-        uint _totalReword);
+        uint _totalReword
+        );
     
+    //좋아요를 눌렀을때 미션식별과 누른사람의 address 를 이벤트 호출
     event LikeMission(
         uint indexed _id,
         address indexed _user
@@ -38,18 +41,29 @@ contract Advertise {
       missionsId++;
   }
   
-  function likeMission(uint _missionId) public returns (bool) {
-      missions[_missionId].likedUsers.push(msg.sender);
-      missions[_missionId].likingNow += 1;
-      
-      emit LikeMission(_missionId,msg.sender);
+   // @dev 광고 "좋아요"를 누르는 기능
+   // @parmas _missionId 광고주가 등록한 미션 식별 아이디.
+  function likeMission(uint _missionId) public {
+      for (uint i = 0; i <= missions[_missionId].likedUsers.length; i++) {
+          if(missions[_missionId].likedUsers[i] == msg.sender){
+              revert();
+          } else {
+              missions[_missionId].likedUsers.push(msg.sender);
+              missions[_missionId].likingNow += 1;
+              emit LikeMission(_missionId,msg.sender);
+          }
+      }
   }
-  
+  // @dev 만든 배열을 갯수를 확인하기 위한 테스트용 함수
+    function dwadwa(uint _missionId) public view returns (uint) {
+      return missions[_missionId].likedUsers.length;
+    }
    // @dev 등록한 광고의 정보를 볼수있는 콜 데이터
-   // @return 목표좋아요,기간,총 보상량,현재 좋아요
-  function getMission() public view returns (uint,uint,uint,uint) {
-      Mission memory mission = missions[missionsId];
-      return (mission.likingGoal, mission.deadline, mission.totalReword, mission.likingNow);
+   // @params _missionId 조회하고 싶은 광고미션의 식별 아이디
+   // @return 목표좋아요, 좋아요눌러준 사람들, 기간, 총 보상량, 현재 좋아요
+  function getMission(uint _missionId) public view returns (uint,address[] memory,uint,uint,uint) {
+      Mission memory mission = missions[_missionId];
+      return (mission.likingGoal, mission.likedUsers, mission.deadline, mission.totalReword, mission.likingNow);
   }
     // @dev 기간을 설정기능.
     // @params _now 현재 시간.
@@ -57,5 +71,6 @@ contract Advertise {
   function getDeadline(uint _now) public pure returns (uint) {
        return _now + (3600 * 24 * 30);
   }
+  
 
 }
