@@ -5,11 +5,26 @@ import "caver-js/packages/caver-kct/src/contract/token/KIP7/KIP7Metadata.sol";
 import "caver-js/packages/caver-kct/src/contract/token/KIP7/KIP7Pausable.sol";
 
 contract HeartLink is KIP7,KIP7Metadata,KIP7Pausable {
+
+    // --------------------------------------~!~!~! STORAGE ~!~!~!~----------------------------------------------
+    
     address public owner; // 첫 배포자.
     uint missionsId = 0; // 광고 식별의 초기 카운트. 필히 storage 데이터로 남길필요가 있다.
     
     mapping (uint256 => Mission) public missions; //광고등록이 덮어씌어지지 않도록 uint id로 맵핑
     
+    //블록체인의 담을 광고의 데이터 구조체.
+    struct Mission{
+        uint id; //미션의 식별자
+        address[] likedUsers; //좋아요를 누른사람들의 지갑 주소
+        address advertiser; //미션을 생성한 광고주의 주소
+        uint likingGoal; //미션을 완료하기 위한 목표 좋아요
+        uint likingNow; //현재 좋아요.
+        uint deadline; //미션 기간 데드라인
+        uint totalReword; //미션에 걸려있는 총 보상
+        bool closed; //미션 달성시 
+    }
+
     // --------------------------------------~!~!~! EVENT ~!~!~!~----------------------------------------------
     
     //스테이킹을 했을때 보낸사람, 클레이의 양을 이벤트 호출
@@ -53,22 +68,9 @@ contract HeartLink is KIP7,KIP7Metadata,KIP7Pausable {
     _;
     }
     
-    //블록체인의 담을 광고의 데이터 구조체.
-    struct Mission{
-        uint id; //미션의 식별자
-        address[] likedUsers; //좋아요를 누른사람들의 지갑 주소
-        address advertiser; //미션을 생성한 광고주의 주소
-        uint likingGoal; //미션을 완료하기 위한 목표 좋아요
-        uint likingNow; //현재 좋아요.
-        uint deadline; //미션 기간 데드라인
-        uint totalReword; //미션에 걸려있는 총 보상
-        bool closed; //미션 달성시 
-    }
-    
     constructor(string memory name, string memory symbol, uint8 decimals) KIP7Metadata(name, symbol, decimals) public { 
     owner = msg.sender;
     }
-    
     
     //  ----------------------------------------------~!@~!@~ Advertise ~~!@~!@~--------------------------------------------
     
