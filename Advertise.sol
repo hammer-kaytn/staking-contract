@@ -4,11 +4,13 @@ import "caver-js/packages/caver-kct/src/contract/token/KIP7/KIP7.sol";
 import "caver-js/packages/caver-kct/src/contract/token/KIP7/KIP7Metadata.sol";
 import "caver-js/packages/caver-kct/src/contract/token/KIP7/KIP7Pausable.sol";
 
-contract Advertise is KIP7,KIP7Metadata,KIP7Pausable {
-    address public owner;
-    uint missionsId = 0; // 광고 식별의 초기 카운트 필히 storage 데이터로 남길필요가 있다.
+contract HeartLink is KIP7,KIP7Metadata,KIP7Pausable {
+    address public owner; // 첫 배포자.
+    uint missionsId = 0; // 광고 식별의 초기 카운트. 필히 storage 데이터로 남길필요가 있다.
     
     mapping (uint256 => Mission) public missions; //광고등록이 덮어씌어지지 않도록 uint id로 맵핑
+    
+    // --------------------------------------~!~!~! EVENT ~!~!~!~----------------------------------------------
     
     //스테이킹을 했을때 보낸사람, 클레이의 양을 이벤트 호출
     event CoinDeposit(
@@ -34,16 +36,26 @@ contract Advertise is KIP7,KIP7Metadata,KIP7Pausable {
         uint indexed _id,
         address indexed _user
         );
+        
+    //광고 미션을 완료하고 보상을 했을때 광고 식별 아이디와 광고주,총 보상량 이벤트 호출
+    event RewordMission(
+        uint indexed _id,
+        address indexed _advertiser,
+        uint indexed _totalReword
+        );
     
+
+    // ----------------------------------------------~!~!~ MODIFIER ~!~!~!-------------------------------------
     
+    //owner 만 제어할수 있도록 하는 modifier 함수.
     modifier onlyOwner(){
     require(msg.sender == owner);
     _;
     }
     
+    //블록체인의 담을 광고의 데이터 구조체.
     struct Mission{
         uint id; //미션의 식별자
-        mapping (address => uint) rewords;
         address[] likedUsers; //좋아요를 누른사람들의 지갑 주소
         address advertiser; //미션을 생성한 광고주의 주소
         uint likingGoal; //미션을 완료하기 위한 목표 좋아요
@@ -93,11 +105,10 @@ contract Advertise is KIP7,KIP7Metadata,KIP7Pausable {
     function createAdvertise(uint _likingGoal, uint _totalReword) public {
         address[] memory likedUsers;
         missions[missionsId] = Mission(missionsId, likedUsers, msg.sender, _likingGoal, 0, getDeadline(now), _totalReword, false);
-        
         Mission memory mission = missions[missionsId];
-        emit GeneratedMission(missionsId, msg.sender, mission.likingGoal, getDeadline(now), mission.totalReword);
         _transfer(msg.sender,address(this),_totalReword);
         missionsId++;
+        emit GeneratedMission(missionsId, msg.sender, mission.likingGoal, getDeadline(now), mission.totalReword);
     }
 
     // @dev 광고 "좋아요"를 누르는 기능
@@ -119,9 +130,10 @@ contract Advertise is KIP7,KIP7Metadata,KIP7Pausable {
             _transfer(address(this),missions[_missionId].likedUsers[i],ratioReword);
         }
         missions[_missionId].closed = true;
+        emit RewordMission(_missionId,missions[_missionId].advertiser,missions[_missionId].totalReword);
     }
     
-    // @dev 등록한 광고의 정보를 볼수있는 콜 데이터(테스트용)
+    // @dev 등록한 광고의 정보(배열안에 지갑주소들)를 볼수있는 콜 데이터(테스트용)
     // @params _missionId 조회하고 싶은 광고미션의 식별 아이디
     // @return 목표좋아요, 좋아요눌러준 사람들, 기간, 총 보상량, 현재 좋아요
     function getMission(uint _missionId) public view returns (uint,address[] memory,uint,uint,uint) {
@@ -138,19 +150,19 @@ contract Advertise is KIP7,KIP7Metadata,KIP7Pausable {
     
     // ----------------------------------- ~!~!~!  STAKING ~!~!~!~ ----------------------------------------------
     
-    // @ dev 스테이킹 기능, 스테이킹시 같은 갯수의 토큰을 반환
+    // @dev 스테이킹 기능, 스테이킹시 같은 갯수의 토큰을 반환
     function Staking() public payable {
         _mint(msg.sender,msg.value);
         emit CoinDeposit(msg.sender, msg.value);
     }
-    // @ dev 언스테이킹 기능,
-    // @ params amount 반환할 토큰의 양
+    // @dev 언스테이킹 기능,
+    // @params amount 반환할 토큰의 양
     function Unstaking(uint256 amount) public {
         _burn(msg.sender,amount);
         msg.sender.transfer(amount);
         emit SwapRequest(msg.sender,amount);
     }
-    //스테이커에게 전송하는 기능. 이 기능은 오로지 컨트렉트의 주인만이 할수있다.
+    // @dev 스테이커에게 전송하는 기능. 이 기능은 오로지 컨트렉트의 주인만이 할수있다.
     function TransferToStaker(address payable _to, uint256 amount) onlyOwner public {
         _to.transfer(amount);
     }

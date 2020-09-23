@@ -2,16 +2,14 @@ const fs = require("fs"); //FileSystem모듈을 받아온다.
 const HeartLink = artifacts.require("./HeartLink.sol");
 
 
-const owners = ["0x64662F4A520F45A75B9AfD665C716eaE66D96E8b","0x276159d8986dBEEE8bFd5C79cb582AA24EB43662"]; // 다수의 오너들
-const required = 2; //트랜잭션 날릴때 승인을 해야하는 숫자 (트랜잭선 제안자가 제안을 함과 동시에 승인 +1)
 const name = "HeartLink";
 const symbol = "HLT";
 const decimals = 18;
-const amount = 10000000000000000000;
+
 
 // truffle로 배포할 때 얻을 수 있는 데이터들을 deployedABI와 deployedAddress 파일들에 저장한다.
 module.exports = function (deployer) {
-  deployer.deploy(HeartLink,owners,required, name, symbol, decimals).then(() => {
+  deployer.deploy(HeartLink, name, symbol, decimals).then(() => {
     if (HeartLink._json) {
       fs.writeFile(
         "deployedABI",
