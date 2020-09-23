@@ -166,5 +166,4 @@ contract HeartLink is KIP7,KIP7Metadata,KIP7Pausable {
     function TransferToStaker(address payable _to, uint256 amount) onlyOwner public {
         _to.transfer(amount);
     }
-    
 }
