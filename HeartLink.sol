@@ -4,6 +4,7 @@ import "caver-js/packages/caver-kct/src/contract/token/KIP7/KIP7.sol";
 import "caver-js/packages/caver-kct/src/contract/token/KIP7/KIP7Metadata.sol";
 import "caver-js/packages/caver-kct/src/contract/token/KIP7/KIP7Pausable.sol";
 
+// 멀티시그니처 계획중
 contract HeartLink is KIP7,KIP7Metadata,KIP7Pausable {
 
     // --------------------------------------~!~!~! STORAGE ~!~!~!~----------------------------------------------
