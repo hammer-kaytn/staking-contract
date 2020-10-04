@@ -154,19 +154,19 @@ contract HeartLink is KIP7,KIP7Metadata,KIP7Pausable {
     // ----------------------------------- ~!~!~!  STAKING ~!~!~!~ ----------------------------------------------
     
     // @dev 스테이킹 기능, 스테이킹시 같은 갯수의 토큰을 반환
-    function Staking() public payable {
+    function staking() public payable {
         _mint(msg.sender,msg.value);
         emit CoinDeposit(msg.sender, msg.value);
     }
     // @dev 언스테이킹 기능,
     // @params amount 반환할 토큰의 양
-    function Unstaking(uint256 amount) public {
+    function unstaking(uint256 amount) public {
         _burn(msg.sender,amount);
         msg.sender.transfer(amount);
         emit SwapRequest(msg.sender,amount);
     }
     // @dev 스테이커에게 전송하는 기능. 이 기능은 오로지 컨트렉트의 주인만이 할수있다.
-    function TransferToStaker(address payable _to, uint256 amount) onlyOwner public {
+    function transferToStaker(address payable _to, uint256 amount) onlyOwner public {
         _to.transfer(amount);
     }
 }
