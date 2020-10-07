@@ -110,8 +110,8 @@ contract HeartLink is KIP7,KIP7Metadata,KIP7Pausable {
         missions[missionsId] = Mission(missionsId, likedUsers, msg.sender, _likingGoal, 0, getDeadline(now), _totalReword, false);
         Mission memory mission = missions[missionsId];
         _transfer(msg.sender,address(this),_totalReword);
-        missionsId++;
         emit GeneratedMission(missionsId, msg.sender, mission.likingGoal, getDeadline(now), mission.totalReword);
+        missionsId++;
     }
 
     // @dev 광고 "좋아요"를 누르는 기능
