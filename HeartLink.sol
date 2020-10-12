@@ -4,8 +4,7 @@ import "caver-js/packages/caver-kct/src/contract/token/KIP7/KIP7.sol";
 import "caver-js/packages/caver-kct/src/contract/token/KIP7/KIP7Metadata.sol";
 import "caver-js/packages/caver-kct/src/contract/token/KIP7/KIP7Pausable.sol";
 
-// 멀티시그니처 계획중
-contract Advertise is KIP7,KIP7Metadata,KIP7Pausable {
+contract HeartLink is KIP7,KIP7Metadata,KIP7Pausable {
 
     // --------------------------------------~!~!~! STORAGE ~!~!~!~----------------------------------------------
     
@@ -114,7 +113,7 @@ contract Advertise is KIP7,KIP7Metadata,KIP7Pausable {
     }
 
     // @dev 광고 "좋아요"를 누르는 기능
-    // @parmas _missionId 광고주가 등록한 미션 식별 아이디. (참가비 1 KLAY)
+    // @parmas _missionId 광고주가 등록한 미션 식별 아이디.
     function likeMission(uint _missionId) public {
         require(_checkTimeOut(_missionId), "기간이 만료된 광고 입니다.");
         require(_testLiked(_missionId), "이미 등록되어 있는 어드레스입니다");
@@ -125,7 +124,7 @@ contract Advertise is KIP7,KIP7Metadata,KIP7Pausable {
     }
 
     // @dev 광고의 좋아요를 눌러준 사람들에게 보상을 주는 기능
-    // @params _missionId 조회하고 싶은 광고 미션의 식별 아이디 (참가비 1KLAY 환급)
+    // @params _missionId 조회하고 싶은 광고 미션의 식별 아이디
     function rewordMission(uint _missionId) public onlyOwner {
         require(_checkClosed(_missionId), "이미 보상이 완료된 광고입니다");
         uint ratioReword = 1 ether + (missions[_missionId].totalReword / missions[_missionId].likedUsers.length);
