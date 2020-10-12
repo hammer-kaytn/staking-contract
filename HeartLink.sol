@@ -5,7 +5,7 @@ import "caver-js/packages/caver-kct/src/contract/token/KIP7/KIP7Metadata.sol";
 import "caver-js/packages/caver-kct/src/contract/token/KIP7/KIP7Pausable.sol";
 
 // 멀티시그니처 계획중
-contract HeartLink is KIP7,KIP7Metadata,KIP7Pausable {
+contract Advertise is KIP7,KIP7Metadata,KIP7Pausable {
 
     // --------------------------------------~!~!~! STORAGE ~!~!~!~----------------------------------------------
     
@@ -60,7 +60,6 @@ contract HeartLink is KIP7,KIP7Metadata,KIP7Pausable {
         uint indexed _totalReword
         );
     
-
     // ----------------------------------------------~!~!~ MODIFIER ~!~!~!-------------------------------------
     
     //owner 만 제어할수 있도록 하는 modifier 함수.
@@ -109,26 +108,27 @@ contract HeartLink is KIP7,KIP7Metadata,KIP7Pausable {
         address[] memory likedUsers;
         missions[missionsId] = Mission(missionsId, likedUsers, msg.sender, _likingGoal, 0, getDeadline(now), _totalReword, false);
         Mission memory mission = missions[missionsId];
-        _transfer(msg.sender,address(this),_totalReword);
+        _transfer(msg.sender, address(this),_totalReword);
         emit GeneratedMission(missionsId, msg.sender, mission.likingGoal, getDeadline(now), mission.totalReword);
         missionsId++;
     }
 
     // @dev 광고 "좋아요"를 누르는 기능
-    // @parmas _missionId 광고주가 등록한 미션 식별 아이디.
+    // @parmas _missionId 광고주가 등록한 미션 식별 아이디. (참가비 1 KLAY)
     function likeMission(uint _missionId) public {
         require(_checkTimeOut(_missionId), "기간이 만료된 광고 입니다.");
         require(_testLiked(_missionId), "이미 등록되어 있는 어드레스입니다");
+        _transfer(msg.sender, address(this), 1 ether);
         missions[_missionId].likedUsers.push(msg.sender);
         missions[_missionId].likingNow += 1;
         emit LikeMission(_missionId,msg.sender);
     }
 
     // @dev 광고의 좋아요를 눌러준 사람들에게 보상을 주는 기능
-    // @params _missionId 조회하고 싶은 광고 미션의 식별 아이디
+    // @params _missionId 조회하고 싶은 광고 미션의 식별 아이디 (참가비 1KLAY 환급)
     function rewordMission(uint _missionId) public onlyOwner {
         require(_checkClosed(_missionId), "이미 보상이 완료된 광고입니다");
-        uint ratioReword = missions[_missionId].totalReword / missions[_missionId].likedUsers.length;
+        uint ratioReword = 1 ether + (missions[_missionId].totalReword / missions[_missionId].likedUsers.length);
         for(uint i = 0; i < missions[_missionId].likedUsers.length; i++){
             _transfer(address(this),missions[_missionId].likedUsers[i],ratioReword);
         }
@@ -158,6 +158,7 @@ contract HeartLink is KIP7,KIP7Metadata,KIP7Pausable {
         _mint(msg.sender,msg.value);
         emit CoinDeposit(msg.sender, msg.value);
     }
+    
     // @dev 언스테이킹 기능,
     // @params amount 반환할 토큰의 양
     function unstaking(uint256 amount) public {
